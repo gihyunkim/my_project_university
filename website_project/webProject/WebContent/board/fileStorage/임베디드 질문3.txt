@@ -1,0 +1,19 @@
+1. 왜 A9_ONCHIP_END -3이 A9 onchip memory의 꼭대기 주소가 되는가??
+
+2. 왜 IRQ_MODE일 때는 스택에 A9_ONCHIP의 주소를 저장하고, SVC_MODE일 때는 DDR메모리의 주소를 집어넣는가?
+
+3. CPSR_c와 CPSR의 차이는?
+
+4. ICDIPTRn이나 ICDISERn에서 왜 R1 주소를 저렇게 정하는가(0x0000100, 0x00000200)
+
+5. 변수에 #을 붙이는건 무슨 의미??
+
+6. part1.s에서 mov r1,#0xF후 STR R1,[R0,#0x8]하면 어차피 덧씌워지는데 어떤 의미가 있는가?
+
+-c언어부분-
+
+7.config_KEYs에서 volatile int를 쓰는 이유?
+
+8. 왜 KEY_ptr +2에다가 값을 넣는건지?
+
+9. IRQ모드에 대한 인터럽트를 지정해 놓았는데 왜 enable_A9_interrupt 함수에서는 svc모드로 전환하는가?

@@ -1,0 +1,120 @@
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/init.h>
+#include <linux/interrupt.h>
+#include <asm/io.h>
+
+#include <linux/fs.h>
+#include <linux/uaccess.h>
+#include <linux/types.h>
+#include <linux/ioport.h>
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("GIHYUN KIM");
+MODULE_DESCRIPTION("7-seg7 Driver");
+#define base_lwFPGA 0xFF200000
+#define len_lwFPGA 0x200000
+
+#define addr_hex3_hex0     0x20
+#define addr_hex5_hex4     0x30
+
+#define SEG_DEVMAJOR 240
+#define SEG_DEVNAME  "hex"
+static void *mem_base;
+
+static void *seg_addr1;
+static void *seg_addr2;
+static unsigned int data = -1;
+
+unsigned int hex0, hex1;
+static int seg_open(struct inode *minode, struct file *mfile)
+{
+        return 0;
+}
+
+static int seg_release(struct inode *minode, struct file *mfile)
+{
+        return 0;
+}
+
+int hex_conversion[16] = {
+        0x3F, 0x06, 0x5B, 0x4F,0x66,0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x
+39, 0x5E, 0x79, 0x71,};
+
+static ssize_t seg_write(struct file *file, const char __user *buf, size_t count
+, loff_t *f_pos){
+	unsigned int seg_data = 0;
+
+        copy_from_user(&seg_data, (unsigned int*)buf, count);
+
+        seg_data = seg_data & 0xFFFFFF; //24-bit mask
+        data = seg_data;
+        hex1 = 0;
+        hex0 = hex_conversion[seg_data & 0xF];
+
+        seg_data >>=4;
+        hex0 |= hex_conversion[seg_data & 0xF] << 8;
+
+        seg_data >>=4;
+        hex0 |= hex_conversion[seg_data & 0xF] << 16;
+
+        seg_data >>=4;
+        hex0 |= hex_conversion[seg_data & 0xF] << 24;
+
+        seg_data >>=4;
+        hex1 |= hex_conversion[seg_data & 0xF];
+
+        seg_data >>=4;
+        hex1 |= hex_conversion[seg_data & 0xF] << 8;
+        iowrite32(hex0, seg_addr1);
+        iowrite32(hex1, seg_addr2);
+        return 4;
+}
+
+static ssize_t seg_read (struct file *file, char __user *buf, size_t count, loff
+_t *f_pos){
+        put_user(data,(unsigned int*)buf);
+        return 4;
+}
+
+static struct file_operations seg_fops = {
+        .read = seg_read,
+        .write = seg_write,
+        .open = seg_open,
+        .release = seg_release,
+};
+
+static int __init seg_init(void)
+{
+        int res;
+
+        res=register_chrdev(SEG_DEVMAJOR, SEG_DEVNAME, &seg_fops);
+        if(res < 0){
+                printk(KERN_ERR " 7-seg: failed to register device.\n");
+                return res;
+        }
+
+        mem_base = ioremap_nocache(base_lwFPGA, len_lwFPGA);
+        if(!mem_base){
+                printk("Error mapping memory\n");
+                release_mem_region(base_lwFPGA, len_lwFPGA);
+                return -EBUSY;
+        }
+       seg_addr1 = mem_base + addr_hex3_hex0;
+        seg_addr2 = mem_base + addr_hex5_hex4;
+
+
+        printk("Device: %s MAJOR: %d\n", SEG_DEVNAME, SEG_DEVMAJOR);
+        return 0;
+}
+
+static void __exit seg_exit(void){
+        unregister_chrdev(SEG_DEVMAJOR, SEG_DEVNAME);
+        printk(" %s unregisterd.\n",SEG_DEVNAME);
+        iowrite32(0,seg_addr1);
+        iowrite32(0,seg_addr2);
+        iounmap(mem_base);
+}
+
+module_init(seg_init);
+module_exit(seg_exit);
