@@ -1,0 +1,14 @@
+module watch (clk, reset, set_outside, set_inside, display_sec, display_sec10, display_min, display_min10, display_hour, display_hour10, state);
+	input clk, reset, set_outside, set_inside;
+	output [6:0] display_sec, display_sec10, display_min, display_min10, display_hour, display_hour10;
+	output [5:0] state;
+	reg inc_min = 1, inc_hour = 1;
+	wire en_sec, en_sec10, en_min, en_min10, en_hour, en_hour10;
+
+	count_display_sec #(60,6) u1 (clk, reset, set_outside, set_inside, en_sec, sec, display_sec, display_sec10, tc_sec);
+	count_display_min #(60,6) u2 (clk, reset, en_min, min, display_min, display_min10, tc_min);
+	count_display_hour #(24,5) u3 (clk, reset, en_hour, hour, display_hour, display_hour10);
+	controller u6 (clk, reset, set_outside, set_inside, tc_sec, tc_sec10, tc_min, tc_min10, 
+				   en_sec, en_sec10, en_min, en_min10, en_hour, state);
+	
+endmodule 
