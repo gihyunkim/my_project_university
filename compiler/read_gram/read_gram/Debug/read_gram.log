@@ -1,0 +1,7 @@
+﻿  read_gram.c
+C:\Users\gihyunKim\source\repos\read_gram\read_gram\read_gram.c(70): warning C4553: '==': 식의 결과가 사용되지 않습니다. '='을(를) 의도했습니까?
+C:\Users\gihyunKim\source\repos\read_gram\read_gram\read_gram.c(46): warning C4101: 'first_result' :참조되지 않은 지역 변수입니다.
+C:\Users\gihyunKim\source\repos\read_gram\read_gram\read_gram.c(200): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\gihyunKim\source\repos\read_gram\read_gram\read_gram.c(231): warning C4018: '>=': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\gihyunKim\source\repos\read_gram\read_gram\read_gram.c(259): warning C4101: 'j' :참조되지 않은 지역 변수입니다.
+  read_gram.vcxproj -> C:\Users\gihyunKim\source\repos\read_gram\Debug\read_gram.exe
